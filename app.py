@@ -27,34 +27,36 @@ bonus_chores = {
     "Empty Dish washer": 10
 }
 
+# Combine all chores into one dictionary
 all_chores = {**mandatory_chores, **bonus_chores}
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     selected_kid = request.form.get("kid", "manha")  # Default to Manha
 
-    # Add new chore
+    # Adding a new chore
     if request.method == "POST" and "new_chore" in request.form:
         new_chore = request.form["new_chore"]
         new_points = int(request.form["points"])
         all_chores[new_chore] = new_points
+        return redirect("/")
 
-    # Add completed chores
+    # Submitting completed chores
     elif request.method == "POST" and "chores" in request.form:
         selected_chores = request.form.getlist("chores")
-        today = datetime.now().strftime("%Y-%m-%d")
+        date = request.form.get("date", datetime.now().strftime("%Y-%m-%d"))
+
         for chore in selected_chores:
             chore_log[selected_kid].append({
                 "chore": chore,
                 "points": all_chores.get(chore, 0),
-                "date": today
+                "date": date
             })
         return redirect("/")
 
-    # Summarize points
+    # Weekly summary for selected kid
     logs = chore_log[selected_kid]
     weekly_summary_data = defaultdict(int)
-
     for c in logs:
         date_obj = datetime.strptime(c["date"], "%Y-%m-%d")
         week = f"Week {date_obj.isocalendar().week}"
@@ -66,10 +68,11 @@ def index():
     return render_template("index.html",
                            selected_kid=selected_kid,
                            all_chores=all_chores,
-                           chores=logs,
+                           chore_log=chore_log,
+                           total_points=total_points,
                            badge=badge,
                            weekly_summary_labels=list(weekly_summary_data.keys()),
                            weekly_summary_data=list(weekly_summary_data.values()))
-
+    
 if __name__ == "__main__":
     app.run(debug=True)
