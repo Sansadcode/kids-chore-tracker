@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Chore Tracker</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #6a1b9a;
+        }
+        .container {
+            background: #fff8dc;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: auto;
+        }
+        .chore-section, .summary-section, .add-chore-section {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .kid-radio {
+            margin: 5px 10px 15px 0;
+        }
+        .chore-list {
+            margin: 10px 0 20px 0;
+        }
+        .chore-list input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .submit-btn {
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #ff1493;
+        }
+        .badge {
+            font-size: 20px;
+            color: #d500f9;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .history {
+            background-color: #e1bee7;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .add-chore-form input {
+            padding: 5px;
+            margin-right: 10px;
+        }
+        .add-chore-form button {
+            background-color: #8e24aa;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table th, .summary-table td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: center;
+        }
+        .summary-table th {
+            background-color: #f06292;
+            color: white;
+        }
+        .summary-table td {
+            background-color: #fce4ec;
+        }
+    </style>
+    <script>
+        const choresData = {
+            manha: ["Brush Teeth", "Make Bed", "Clean Room", "Do Homework", "Wash Dishes", "Help Cook", "Water Plants", "Fold Laundry"],
+            furqaan: ["Brush Teeth", "Make Bed", "Clean Room", "Do Homework", "Wash Dishes", "Help Cook", "Water Plants", "Fold Laundry"]
+        };
+
+        const chorePoints = {
+            "Brush Teeth": 5,
+            "Make Bed": 10,
+            "Clean Room": 15,
+            "Do Homework": 20,
+            "Wash Dishes": 25,
+            "Help Cook": 30,
+            "Water Plants": 10,
+            "Fold Laundry": 20
+        };
+
+        let selectedKid = "";
+        let dataStore = { manha: [], furqaan: [] };
+
+        function updateChoreList() {
+            const container = document.getElementById("chore-container");
+            container.innerHTML = "";
+            if (!selectedKid) return;
+
+            choresData[selectedKid].forEach(chore => {
+                const label = document.createElement("label");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.name = "chores";
+                checkbox.value = chore;
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(" " + chore + " (" + chorePoints[chore] + " pts)"));
+                container.appendChild(label);
+            });
+        }
+
+        function selectKid(name) {
+            selectedKid = name;
+            updateChoreList();
+            renderHistory();
+        }
+
+        function submitChores() {
+            const checkboxes = document.querySelectorAll('input[name="chores"]:checked');
+            const date = new Date();
+            const week = `Week ${getWeekNumber(date)}`;
+            const month = date.toLocaleString('default', { month: 'long' });
+
+            checkboxes.forEach(cb => {
+                const points = chorePoints[cb.value] || 0;
+                dataStore[selectedKid].push({ chore: cb.value, points, week, month });
+            });
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = document.getElementById("history");
+            const badgeDiv = document.getElementById("badge");
+            const weekTable = document.getElementById("weekly-table");
+            const monthTable = document.getElementById("monthly-table");
+
+            if (!selectedKid) return;
+
+            const kidData = dataStore[selectedKid];
+            let totalPoints = 0;
+            history.innerHTML = "";
+            weekTable.innerHTML = "";
+            monthTable.innerHTML = "";
+
+            const weeklyPoints = {};
+            const monthlyPoints = {};
+
+            kidData.forEach(entry => {
+                totalPoints += entry.points;
+                const div = document.createElement("div");
+                div.textContent = `${entry.chore} - ${entry.points} pts (${entry.week}, ${entry.month})`;
+                history.appendChild(div);
+
+                weeklyPoints[entry.week] = (weeklyPoints[entry.week] || 0) + entry.points;
+                monthlyPoints[entry.month] = (monthlyPoints[entry.month] || 0) + entry.points;
+            });
+
+            badgeDiv.textContent = totalPoints >= 100 ? `🎉 Yay! ${selectedKid} earned a badge!` : "";
+
+            weekTable.innerHTML = `<tr><th>Week</th><th>Points</th></tr>` +
+                Object.entries(weeklyPoints).map(([w, p]) => `<tr><td>${w}</td><td>${p}</td></tr>`).join("");
+
+            monthTable.innerHTML = `<tr><th>Month</th><th>Points</th></tr>` +
+                Object.entries(monthlyPoints).map(([m, p]) => `<tr><td>${m}</td><td>${p}</td></tr>`).join("");
+        }
+
+        function addNewChore() {
+            const newChore = document.getElementById("new-chore").value;
+            const points = parseInt(document.getElementById("new-points").value);
+            if (!newChore || isNaN(points)) return;
+
+            if (!choresData[selectedKid].includes(newChore)) {
+                choresData[selectedKid].push(newChore);
+                chorePoints[newChore] = points;
+                updateChoreList();
+            }
+        }
+
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+    </script>
+</head>
+<body>
+    <h1>🌟 Kids Chore Tracker 🌟</h1>
+    <div class="container">
+        <div class="chore-section">
+            <label>Select Kid:</label>
+            <label class="kid-radio"><input type="radio" name="kid" onclick="selectKid('manha')"> Manha</label>
+            <label class="kid-radio"><input type="radio" name="kid" onclick="selectKid('furqaan')"> Furqaan</label>
+
+            <div class="chore-list" id="chore-container"></div>
+            <button class="submit-btn" onclick="submitChores()">Submit Chores</button>
+        </div>
+
+        <div class="add-chore-section">
+            <h3>Add New Chore</h3>
+            <form class="add-chore-form" onsubmit="event.preventDefault(); addNewChore();">
+                <input type="text" id="new-chore" placeholder="Chore name">
+                <input type="number" id="new-points" placeholder="Points">
+                <button type="submit">Add Chore</button>
+            </form>
+        </div>
+
+        <div id="badge" class="badge"></div>
+
+        <div class="summary-section">
+            <h3>Chore History</h3>
+            <div class="history" id="history"></div>
+        </div>
+
+        <div class="summary-section">
+            <h3>Weekly Points Summary</h3>
+            <table class="summary-table" id="weekly-table"></table>
+        </div>
+
+        <div class="summary-section">
+            <h3>Monthly Points Summary</h3>
+            <table class="summary-table" id="monthly-table"></table>
+        </div>
+    </div>
+</body>
+</html>

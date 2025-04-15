@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chores</title>
+</head>
+<body>
+    <h2>Chore List</h2>
+    <ul>
+        {% for chore in chores %}
+        <li>
+            {{ chore[1] }} - Assigned to {{ chore[2] }} - Points: {{ chore[4] }} -
+            {% if chore[3] %}
+                ✅ Completed
+            {% else %}
+                <a href="/complete/{{ chore[0] }}">Mark as Done</a>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Back to Home</a>
+</body>
+</html>
