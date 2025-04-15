@@ -86,14 +86,6 @@
             background-color: #e1f5fe;
         }
 
-        .manha-theme {
-            background-color: #fde2ff;
-        }
-
-        .furqaan-theme {
-            background-color: #e1f5fe;
-        }
-
         .badge {
             font-weight: bold;
             color: #4caf50;
@@ -108,12 +100,12 @@
             margin: 10px 0;
         }
 
-        .furqaan-points {
-            color: #1e88e5;
-        }
-
         .chore-selection {
             margin-bottom: 30px;
+        }
+
+        .kid-section {
+            background-color: #fff0f5;
         }
 
     </style>
@@ -129,8 +121,9 @@
             <!-- Chore Submission Form -->
             <form class="chore-selection" method="POST" action="/">
                 <label><strong>Kid's Name:</strong></label><br>
-                <input type="radio" name="kid" value="manha" {% if selected_kid == 'manha' %}checked{% endif %}> Manha
-                <input type="radio" name="kid" value="furqaan" {% if selected_kid == 'furqaan' %}checked{% endif %}> Furqaan
+                {% for kid in all_kids %}
+                    <input type="radio" name="kid" value="{{ kid }}" {% if selected_kid == kid %}checked{% endif %}> {{ kid.capitalize() }}
+                {% endfor %}
                 <br><br>
 
                 <label><strong>Select Chores:</strong></label><br>
@@ -157,6 +150,14 @@
                 <input type="submit" value="Add Chore">
             </form>
 
+            <!-- Add a New Kid Form -->
+            <form method="POST" action="/">
+                <h3>👶 Add a New Kid</h3>
+                <label>Kid's Name:</label>
+                <input type="text" name="new_kid" required>
+                <input type="submit" value="Add Kid">
+            </form>
+
             <!-- Filter by Date -->
             <form method="GET" action="/">
                 <label><strong>📅 Filter by Date:</strong></label>
@@ -167,51 +168,29 @@
 
         <!-- Right Side: Chore Logs & Progress -->
         <div class="right">
-
-            <div class="chore-history manha-theme">
-                <h3>💖 Manha's Progress</h3>
-                <p class="total-points">Total Points: {{ total_points['manha'] }}</p>
-                {% if badge and selected_kid == 'manha' %}
-                    <div class="badge">🏅 {{ badge }}</div>
-                {% endif %}
-                <table>
-                    <tr>
-                        <th>Date</th>
-                        <th>Chore</th>
-                        <th>Points</th>
-                    </tr>
-                    {% for c in chore_log['manha'] %}
-                    <tr>
-                        <td>{{ c.date }}</td>
-                        <td>{{ c.chore }}</td>
-                        <td>{{ c.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-
-            <div class="chore-history furqaan-theme">
-                <h3>💙 Furqaan's Progress</h3>
-                <p class="total-points furqaan-points">Total Points: {{ total_points['furqaan'] }}</p>
-                {% if badge and selected_kid == 'furqaan' %}
-                    <div class="badge">🏅 {{ badge }}</div>
-                {% endif %}
-                <table>
-                    <tr>
-                        <th>Date</th>
-                        <th>Chore</th>
-                        <th>Points</th>
-                    </tr>
-                    {% for c in chore_log['furqaan'] %}
-                    <tr>
-                        <td>{{ c.date }}</td>
-                        <td>{{ c.chore }}</td>
-                        <td>{{ c.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-
+            {% for kid in all_kids %}
+                <div class="chore-history kid-section">
+                    <h3>✨ {{ kid.capitalize() }}'s Progress</h3>
+                    <p class="total-points">Total Points: {{ total_points[kid] }}</p>
+                    {% if badge and selected_kid == kid %}
+                        <div class="badge">🏅 {{ badge }}</div>
+                    {% endif %}
+                    <table>
+                        <tr>
+                            <th>Date</th>
+                            <th>Chore</th>
+                            <th>Points</th>
+                        </tr>
+                        {% for c in chore_log[kid] %}
+                        <tr>
+                            <td>{{ c.date }}</td>
+                            <td>{{ c.chore }}</td>
+                            <td>{{ c.points }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
         </div>
     </div>
 

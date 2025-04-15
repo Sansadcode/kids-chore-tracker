@@ -5,11 +5,13 @@ from collections import defaultdict
 app = Flask(__name__)
 app.secret_key = "secret"
 
-# In-memory chore log per kid
+# In-memory data stores
 chore_log = {
     "manha": [],
     "furqaan": []
 }
+
+all_kids = ["manha", "furqaan"]
 
 # Default chores
 mandatory_chores = {
@@ -27,24 +29,36 @@ bonus_chores = {
     "Empty Dish washer": 10
 }
 
-# Combine all chores into one dictionary
 all_chores = {**mandatory_chores, **bonus_chores}
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    selected_kid = request.form.get("kid", "manha")  # Default to Manha
+    global all_kids
 
-    # Adding a new chore
-    if request.method == "POST" and "new_chore" in request.form:
+    selected_kid = request.form.get("kid") or "manha"
+
+    # Add a new kid
+    if request.method == "POST" and "new_kid" in request.form:
+        new_kid = request.form["new_kid"].strip().lower()
+        if new_kid and new_kid not in all_kids:
+            all_kids.append(new_kid)
+            chore_log[new_kid] = []
+        return redirect("/")
+
+    # Add a new chore
+    elif request.method == "POST" and "new_chore" in request.form:
         new_chore = request.form["new_chore"]
         new_points = int(request.form["points"])
         all_chores[new_chore] = new_points
         return redirect("/")
 
-    # Submitting completed chores
+    # Submit completed chores
     elif request.method == "POST" and "chores" in request.form:
         selected_chores = request.form.getlist("chores")
         date = request.form.get("date", datetime.now().strftime("%Y-%m-%d"))
+
+        if selected_kid not in chore_log:
+            chore_log[selected_kid] = []
 
         for chore in selected_chores:
             chore_log[selected_kid].append({
@@ -54,25 +68,22 @@ def index():
             })
         return redirect("/")
 
-    # Weekly summary for selected kid
-    logs = chore_log[selected_kid]
-    weekly_summary_data = defaultdict(int)
-    for c in logs:
-        date_obj = datetime.strptime(c["date"], "%Y-%m-%d")
-        week = f"Week {date_obj.isocalendar().week}"
-        weekly_summary_data[week] += c["points"]
-
-    total_points = sum(c["points"] for c in logs)
-    badge = "🥇 Awesome! You've earned a badge for reaching 100 points!" if total_points >= 100 else None
+    # Prepare chore logs, total points, and badges for each kid
+    total_points_by_kid = {}
+    badge_by_kid = {}
+    for kid in all_kids:
+        logs = chore_log.get(kid, [])
+        total = sum(c["points"] for c in logs)
+        total_points_by_kid[kid] = total
+        badge_by_kid[kid] = "🥇 Awesome! You've earned a badge for reaching 100 points!" if total >= 100 else None
 
     return render_template("index.html",
                            selected_kid=selected_kid,
+                           all_kids=all_kids,
                            all_chores=all_chores,
                            chore_log=chore_log,
-                           total_points=total_points,
-                           badge=badge,
-                           weekly_summary_labels=list(weekly_summary_data.keys()),
-                           weekly_summary_data=list(weekly_summary_data.values()))
+                           total_points=total_points_by_kid,
+                           badge=badge_by_kid)
     
 if __name__ == "__main__":
     app.run(debug=True)
