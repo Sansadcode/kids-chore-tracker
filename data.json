@@ -1,0 +1,79 @@
+{
+    "chore_log": {
+        "manha": [
+            {
+                "chore": "Brush Teeth",
+                "points": 5,
+                "date": "2025-04-15"
+            },
+            {
+                "chore": "Make Bed",
+                "points": 5,
+                "date": "2025-04-15"
+            },
+            {
+                "chore": "Clean Room",
+                "points": 5,
+                "date": "2025-04-15"
+            },
+            {
+                "chore": "Do Homework",
+                "points": 5,
+                "date": "2025-04-15"
+            },
+            {
+                "chore": "Wash Dishes",
+                "points": 10,
+                "date": "2025-04-15"
+            },
+            {
+                "chore": "Brush Teeth",
+                "points": 5,
+                "date": "2025-04-16"
+            },
+            {
+                "chore": "Wash Dishes",
+                "points": 10,
+                "date": "2025-04-16"
+            }
+        ],
+        "furqaan": [
+            {
+                "chore": "Do Homework",
+                "points": 5,
+                "date": "2025-04-15"
+            },
+            {
+                "chore": "Help Cook",
+                "points": 15,
+                "date": "2025-04-15"
+            },
+            {
+                "chore": "Water Plants",
+                "points": 10,
+                "date": "2025-04-15"
+            },
+            {
+                "chore": "Fold Laundry",
+                "points": 20,
+                "date": "2025-04-15"
+            }
+        ]
+    },
+    "all_kids": [
+        "manha",
+        "furqaan"
+    ],
+    "all_chores": {
+        "Brush Teeth": 5,
+        "Make Bed": 5,
+        "Clean Room": 5,
+        "Do Homework": 5,
+        "Wash Dishes": 10,
+        "Help Cook": 15,
+        "Water Plants": 10,
+        "Fold Laundry": 20,
+        "Empty Dish washer": 10,
+        "Finishing Lunch": 5
+    }
+}
